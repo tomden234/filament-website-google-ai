@@ -463,21 +463,39 @@ export const BambuPrinterWidget: React.FC<BambuPrinterWidgetProps> = ({
     if (!isCameraOpen) return;
     let active = true;
 
-    const refreshCamera = async () => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    // Ein Bild nach dem anderen (kein Stau), sofort das nächste, Bild wird vor dem Tausch fertig dekodiert (kein Flackern)
+    const loop = async () => {
+      if (!active) return;
+      if (document.hidden) {
+        timer = setTimeout(loop, 1000);
+        return;
+      }
+      const t0 = Date.now();
       const blob = await fetchHaCameraBlobUrl();
       if (blob && active) {
+        try {
+          const im = new Image();
+          im.src = blob;
+          await im.decode();
+        } catch {
+          /* trotzdem anzeigen */
+        }
+        if (!active) {
+          URL.revokeObjectURL(blob);
+          return;
+        }
         setHaCameraBlobUrl(prev => {
-          if (prev) URL.revokeObjectURL(prev);
+          if (prev) setTimeout(() => URL.revokeObjectURL(prev), 1500);
           return blob;
         });
       }
+      timer = setTimeout(loop, Math.max(0, (blob ? 150 : 2000) - (Date.now() - t0)));
     };
-
-    refreshCamera();
-    const interval = setInterval(refreshCamera, 3000);
+    void loop();
     return () => {
       active = false;
-      clearInterval(interval);
+      if (timer) clearTimeout(timer);
     };
   }, [isCameraOpen, cameraSnapshotKey]);
 

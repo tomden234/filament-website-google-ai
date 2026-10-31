@@ -2,7 +2,7 @@
 
 Filament-Verwaltung für den Bambu Lab X2D mit AMS 2 Pro: Spulenbestand, Waage, Trocknen, Druckverlauf, Home Assistant, NFC-Tags und Cloud-Sync. Läuft als Webseite, Android-App und Windows-App. Frontend mit React und Vite, Server mit Express.
 
-Aktuelle Version: **1.133 (Verzögerter Druck startet sicher)**. Die Zählung läuft ab 1.100 einfach weiter, die 2 bleibt für ein großes Update frei (intern heißt 1.133 im Paket 2.0.133, damit Updates sicher aufwärts zählen). Alle Versionen stehen im Revisionsmenü der App und lassen sich dort auswählen.
+Aktuelle Version: **1.134 (Kamera & AMS neu angeordnet)**. Die Zählung läuft ab 1.100 einfach weiter, die 2 bleibt für ein großes Update frei (intern heißt 1.134 im Paket 2.0.134, damit Updates sicher aufwärts zählen). Alle Versionen stehen im Revisionsmenü der App und lassen sich dort auswählen.
 
 ## Was die App kann (Kurzüberblick)
 
@@ -53,7 +53,7 @@ Aktuelle Version: **1.133 (Verzögerter Druck startet sicher)**. Die Zählung l�
 
 🟢 fertig · 🟡 vorbereitet · ⚪ offen
 
-## Neu am 29./30.10.2026 (1.105 bis 1.133)
+## Neu am 29./30.10.2026 (1.105 bis 1.134)
 
 Alles, was an diesem Tag dazukam, steht hier zusammen.
 
@@ -88,6 +88,7 @@ Alles, was an diesem Tag dazukam, steht hier zusammen.
 | 1.131 | Korrektur: nur 3 Bambu PLA Weiß, Hellgrün mit Tara 100 + 35 + 57 g (1315 g ergibt über 1 kg, bitte neu wiegen) |
 | 1.132 | Bambu Hellgrün auf 960 g, Isan PLA Plus Dunkelgrün wieder dabei (getrennt von Bambu Dunkelgrün) |
 | 1.133 | Druck verzögern repariert: Plan bleibt beim Pausieren erhalten, Trocknung blockiert das Fortsetzen nicht mehr, Sicherheitsnetz im Drucker-Kern setzt auch bei geschlossener App fort |
+| 1.134 | Kamera aufgeräumt (keine Überlappung), flüssiger, Vollbild-Knopf; AMS-Temperatur und Feuchte als saubere Karten |
 
 ### Druck-Wächter (1.105)
 

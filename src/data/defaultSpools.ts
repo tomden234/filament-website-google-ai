@@ -1970,5 +1970,21 @@ export const INITIAL_VERSION_PROFILES: VersionProfile[] = [
     spoolsSnapshot: MY_SPOOLS,
     historySnapshot: [],
     viewMode: 'simple'
+  },
+  {
+    id: 'v1.134',
+    label: '1.134 (Kamera & AMS neu angeordnet)',
+    releaseDate: '31.10.2026',
+    description: 'Kamera ohne Überlappung, flüssiger und mit Groß-Knopf. AMS-Temperatur und Feuchte als saubere Karten.',
+    features: [
+      '📷 Kamera aufgeräumt: keine Texte mehr über dem Bild, nur LIVE und ein Groß-Knopf; Knöpfe in eigener Zeile',
+      '🔍 Neuer Vollbild-Modus für die Kamera (Knopf „Groß“), Schließen mit Knopf, Tippen aufs Schwarze oder Esc',
+      '🎞️ Flüssiger: Das nächste Bild wird sofort geholt (vorher alle 3 s), vorher fertig geladen, kein Flackern; pausiert bei verdecktem Fenster',
+      '🌡️ AMS-Trocknung: Box-Sensor und AMS als zwei Karten mit großer Temperatur und Feuchte (Farbe nach Feuchte), Restzeit in eigener Zeile',
+      '🔢 Aktualisierte Zahlen-FunFacts: 112 Commits und 134 Revisionsstufen'
+    ],
+    spoolsSnapshot: MY_SPOOLS,
+    historySnapshot: [],
+    viewMode: 'simple'
   }
 ];

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, RefreshCw, Droplets, Sun, Square, Nfc, AlertTriangle } from 'lucide-react';
+import { Box, RefreshCw, Droplets, Sun, Square, Nfc, AlertTriangle, Thermometer } from 'lucide-react';
 import { safeStorage } from '../../utils/safeStorage';
 import { addSystemLog } from '../../utils/logService';
 import type { PrinterExpandedPanelProps as ParentProps } from './PrinterExpandedPanel';
@@ -35,31 +35,58 @@ export interface AmsSectionProps {
 }
 
 // Gemessen: Box-Sensor (ESP32 über Home Assistant) und AMS selbst, alles in °C
+const humTone = (h: number | null | undefined) => (h === null || h === undefined || !Number.isFinite(h) ? 'var(--app-text-muted)' : h <= 40 ? '#10b981' : h <= 60 ? '#f59e0b' : '#f43f5e');
+
+const Metric: React.FC<{ icon: React.ReactNode; value: string; unit: string; color?: string }> = ({ icon, value, unit, color }) => (
+  <div className="min-w-0 rounded-lg px-2 py-1.5 flex flex-col gap-0.5" style={{ backgroundColor: 'var(--app-card)' }}>
+    <span className="opacity-80">{icon}</span>
+    <span className="leading-none whitespace-nowrap">
+      <span className="text-base font-extrabold tabular-nums" style={{ color: color || 'var(--app-text)' }}>{value}</span>
+      <span className="text-[10px] font-bold ml-0.5" style={{ color: 'var(--app-text-muted)' }}>{unit}</span>
+    </span>
+  </div>
+);
+
+const ClimateCard: React.FC<{ title: string; hint: string; temp: string; hum: string; humPct: number | null; error?: string }> = ({ title, hint, temp, hum, humPct, error }) => (
+  <div className="min-w-0 rounded-xl border p-2" style={{ borderColor: 'var(--app-border)', backgroundColor: 'var(--app-card-sub)' }}>
+    <div className="flex items-baseline justify-between gap-1 mb-1.5 px-0.5">
+      <span className="text-[11px] font-extrabold truncate" style={{ color: 'var(--app-text)' }}>{title}</span>
+      <span className="text-[9px] shrink-0" style={{ color: 'var(--app-text-muted)' }}>{hint}</span>
+    </div>
+    {error ? (
+      <div className="text-[10px] leading-snug px-0.5 py-1" style={{ color: 'var(--app-text-muted)' }}>{error}</div>
+    ) : (
+      <div className="grid grid-cols-2 gap-1.5">
+        <Metric icon={<Thermometer className="w-3.5 h-3.5 text-orange-400" />} value={temp} unit="°C" />
+        <Metric icon={<Droplets className="w-3.5 h-3.5 text-sky-400" />} value={hum} unit="%" color={humTone(humPct)} />
+      </div>
+    )}
+  </div>
+);
+
 const BoxClimate: React.FC<{ unit: any }> = ({ unit }) => {
   const hum = useHumidity();
   const box = hum.external;
   const amsTemp = Number(unit?.temp);
   const amsHum = amsHumidityPercent(unit);
   const fmt = (n: number | null | undefined, d = 1) => (n === null || n === undefined || !Number.isFinite(n) ? '–' : n.toLocaleString('de-DE', { maximumFractionDigits: d }));
-  const boxTemp = box?.temp ?? null;
   return (
-    <div className="grid grid-cols-2 gap-2 text-[11px] font-mono" style={{ color: 'var(--app-text-muted)' }}>
-      <div className="rounded-xl border px-2.5 py-1.5" style={{ borderColor: 'var(--app-border)' }}>
-        <div className="text-[10px] font-bold" style={{ color: 'var(--app-text)' }}>Box-Sensor (gemessen)</div>
-        {box?.error && box.value === null ? (
-          <div>{box.error}</div>
-        ) : (
-          <div>
-            🌡️ {fmt(boxTemp)} °C · 💧 {fmt(box?.value ?? null, 0)} %
-          </div>
-        )}
-      </div>
-      <div className="rounded-xl border px-2.5 py-1.5" style={{ borderColor: 'var(--app-border)' }}>
-        <div className="text-[10px] font-bold" style={{ color: 'var(--app-text)' }}>AMS misst</div>
-        <div>
-          🌡️ {fmt(Number.isFinite(amsTemp) && amsTemp > 0 ? amsTemp : null)} °C · 💧 {fmt(amsHum, 0)} %
-        </div>
-      </div>
+    <div className="grid grid-cols-2 gap-2">
+      <ClimateCard
+        title="Box-Sensor"
+        hint="gemessen"
+        temp={fmt(box?.temp ?? null)}
+        hum={fmt(box?.value ?? null, 0)}
+        humPct={box?.value ?? null}
+        error={box?.error && box.value === null ? box.error : undefined}
+      />
+      <ClimateCard
+        title="AMS"
+        hint="Drucker"
+        temp={fmt(Number.isFinite(amsTemp) && amsTemp > 0 ? amsTemp : null)}
+        hum={fmt(amsHum, 0)}
+        humPct={amsHum}
+      />
     </div>
   );
 };
@@ -276,33 +303,26 @@ export const AmsSection: React.FC<AmsSectionProps> = ({
                 borderColor: 'var(--app-border)'
               }}
             >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <Droplets className="w-4 h-4 text-sky-400" />
-                  <span className="font-bold" style={{ color: 'var(--app-text)' }}>
-                    AMS Filament-Trocknung (Bambu Lab X2D):
-                  </span>
-                  <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                      isDryingActive
-                        ? 'bg-sky-500/20 text-sky-300 border-sky-400/50 animate-pulse'
-                        : 'bg-[var(--app-card-sub)] text-[var(--app-text-muted)] border-[var(--app-border)]'
-                    }`}
-                  >
-                    {isDryingActive ? '🔥 Trocknung aktiv' : 'Inaktiv (Standby)'}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Droplets className="w-4 h-4 text-sky-400 shrink-0" />
+                  <span className="font-extrabold text-sm truncate" style={{ color: 'var(--app-text)' }}>
+                    AMS Trocknung
                   </span>
                 </div>
-
-                <div className="flex items-center gap-2 text-[11px] text-[var(--app-text-muted)] font-mono">
-                  {liveState.data.ams?.ams?.[0]?.temp && (
-                    <span>AMS-Temp: {liveState.data.ams.ams[0].temp}°C</span>
-                  )}
-                  <span>• Feuchte: {getHumidityDisplay()}</span>
-                  {isDryingActive && calcRemainingTime() && (
-                    <span className="text-sky-300 font-bold">• ⏳ Restzeit: {calcRemainingTime()}</span>
-                  )}
-                </div>
+                <span
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap shrink-0 ${
+                    isDryingActive
+                      ? 'bg-sky-500/20 text-sky-300 border-sky-400/50 animate-pulse'
+                      : 'bg-[var(--app-card-sub)] text-[var(--app-text-muted)] border-[var(--app-border)]'
+                  }`}
+                >
+                  {isDryingActive ? '🔥 aktiv' : 'Standby'}
+                </span>
               </div>
+              {isDryingActive && calcRemainingTime() && (
+                <div className="text-[11px] font-bold text-sky-300">⏳ Restzeit: {calcRemainingTime()}</div>
+              )}
 
               <BoxClimate unit={liveState.data.ams?.ams?.[0]} />
 
